@@ -1,5 +1,15 @@
 #pragma once
 
+void saveTr2MeshInTec(
+	int numofpoint,
+	double* pointlist,
+	int numoftriface,
+	int* trifacelist,
+	int numoftet,
+	int* tetlist,
+	char* filename
+);
+
 void saveTr2Mesh(
 	int numofpoint,
 	double* pointlist,

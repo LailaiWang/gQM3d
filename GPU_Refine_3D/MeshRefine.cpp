@@ -135,6 +135,33 @@ void removeDuplicatedTrifaces(
 	}
 }
 
+void saveTr2MeshInTec(
+	int numofpoint,
+	double* pointlist,
+	int numoftriface,
+	int* trifacelist,
+	int numoftet,
+	int* tetlist,
+	char* filename
+)
+{
+	FILE* fp = fopen(filename, "w");
+	if (fp == NULL) {
+		printf("Cannot write to file!");
+		exit(0);
+	}
+
+	fprintf(fp, "tecplot visualization\n");
+	fprintf(fp, "Variables = \"x\", \"y\", \"z\"\n");
+	fprintf(fp, "Zone T= \"BLOCK\", N = %ld, E = %ld, DATAPACKING = POINT, ZONETYPE = FETETRAHEDRON\n", numofpoint, numoftet);
+	for (int i = 0; i < numofpoint; i++)
+		fprintf(fp, "%lf %lf %lf\n", pointlist[3 * i + 0], pointlist[3 * i + 1], pointlist[3 * i + 2]);
+	for (int i = 0; i < numoftet; i++)
+		fprintf(fp, "%d %d %d %d\n", tetlist[4 * i + 0] + 1, tetlist[4 * i + 1] + 1, tetlist[4 * i + 2] + 1, tetlist[4 * i + 3] + 1);
+
+	fclose(fp);
+}
+
 void saveTr2Mesh(
 	int numofpoint,
 	double* pointlist,
@@ -956,7 +983,7 @@ void refineInputFileOnCPU(
 
 	// Output mesh
 	if (outmesh != NULL)
-		saveTr2Mesh(
+		saveTr2MeshInTec(
 			output_cdt.numberofpoints,
 			output_cdt.pointlist,
 			output_cdt.numberoftrifaces,
@@ -1106,7 +1133,7 @@ void refineInputFileOnGPU(
 
 	// Output mesh
 	if (outmesh != NULL)
-		saveTr2Mesh(
+		saveTr2MeshInTec(
 			out_numofpoint,
 			out_pointlist,
 			out_numoftriface,

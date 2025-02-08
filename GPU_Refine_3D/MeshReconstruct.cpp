@@ -1467,7 +1467,7 @@ void makesubfacepointsmap(
 				for (j = 0; j < 3; j++) {
 					if (!isshsubseg(parysh, subface2seglist)) {
 						spivot(parysh, neighsh, subface2subfacelist);
-						assert(neighsh.shver != NULL);
+						assert(neighsh.shver != '0');
 						//if (subloop.id == 27)
 						//{
 						//	int tmp[4];
