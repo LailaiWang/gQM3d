@@ -1,0 +1,8 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/GPU_CDT/.vs/GPU_CDT/v17
+/GPU_CDT/.vs/GPU_CDT/FileContentIndex
+/GPU_CDT/GPU_CDT/x64
+/GPU_CDT/x64/Debug

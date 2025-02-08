@@ -175,7 +175,7 @@ struct CavityTupleComp
 	{
 		if (thrust::get<1>(t1) < thrust::get<1>(t2))
 			return true;
-		if (thrust::get<1>(t1) > thrust::get<1>(t1))
+		if (thrust::get<1>(t1) > thrust::get<1>(t2))
 			return false;
 
 		tethandle h1 = thrust::get<0>(t1);
