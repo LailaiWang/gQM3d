@@ -173,13 +173,13 @@ struct CavityTupleComp
 		const thrust::tuple<tethandle, int> t1,
 		const thrust::tuple<tethandle, int> t2)
 	{
-		if (t1.get<1>() < t2.get<1>())
+		if (thrust::get<1>(t1) < thrust::get<1>(t2))
 			return true;
-		if (t1.get<1>() > t2.get<1>())
+		if (thrust::get<1>(t1) > thrust::get<1>(t1))
 			return false;
 
-		tethandle h1 = t1.get<0>();
-		tethandle h2 = t2.get<0>();
+		tethandle h1 = thrust::get<0>(t1);
+		tethandle h2 = thrust::get<0>(t2);
 		if (h1.id < h2.id)
 			return true;
 		if (h1.id > h2.id)
@@ -199,11 +199,11 @@ struct CavityTupleEqualTo
 		const thrust::tuple<tethandle, int> t1,
 		const thrust::tuple<tethandle, int> t2)
 	{
-		if (t1.get<1>() != t2.get<1>())
+		if (thrust::get<1>(t1) != thrust::get<1>(t2))
 			return false;
 
-		tethandle h1 = t1.get<0>();
-		tethandle h2 = t2.get<0>();
+		tethandle h1 = thrust::get<0>(t1);
+		tethandle h2 = thrust::get<0>(t2);
 		if (h1.id != h2.id || h1.ver != h2.ver)
 			return false;
 
@@ -217,13 +217,13 @@ struct SubfaceTupleComp
 		const thrust::tuple<trihandle, int> t1,
 		const thrust::tuple<trihandle, int> t2)
 	{
-		if (t1.get<1>() < t2.get<1>())
+		if (thrust::get<1>(t1) < thrust::get<1>(t2))
 			return true;
-		if (t1.get<1>() > t2.get<1>())
+		if (thrust::get<1>(t1) > thrust::get<1>(t2))
 			return false;
 
-		trihandle h1 = t1.get<0>();
-		trihandle h2 = t2.get<0>();
+		trihandle h1 = thrust::get<0>(t1);
+		trihandle h2 = thrust::get<0>(t2);
 		if (h1.id < h2.id)
 			return true;
 		if (h1.id > h2.id)
@@ -239,11 +239,11 @@ struct SubfaceTupleEqualTo
 		const thrust::tuple<trihandle, int> t1,
 		const thrust::tuple<trihandle, int> t2)
 	{
-		if (t1.get<1>() != t2.get<1>())
+		if (thrust::get<1>(t1) != thrust::get<1>(t2))
 			return false;
 
-		trihandle h1 = t1.get<0>();
-		trihandle h2 = t2.get<0>();
+		trihandle h1 = thrust::get<0>(t1);
+		trihandle h2 = thrust::get<0>(t2);
 		if (h1.id != h2.id)
 			return false;
 

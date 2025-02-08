@@ -82,7 +82,7 @@ int insertPoint_New(
 
 	// Compute priorities
 	numberofblocks = (ceil)((float)numofinsertpt / BLOCK_SIZE);
-	kernelComputePriorities << <numberofblocks, BLOCK_SIZE >> > (
+	kernelComputePriorities <<< numberofblocks, BLOCK_SIZE >>> (
 		thrust::raw_pointer_cast(&t_pointlist[0]),
 		thrust::raw_pointer_cast(&t_seglist[0]),
 		thrust::raw_pointer_cast(&t_trifacelist[0]),
@@ -126,7 +126,7 @@ int insertPoint_New(
 			behavior->filterstatus = 3;
 	}
 
-	kernelComputeSteinerPoints << <numberofblocks, BLOCK_SIZE >> > (
+	kernelComputeSteinerPoints <<<numberofblocks, BLOCK_SIZE >>> (
 		thrust::raw_pointer_cast(&t_pointlist[0]),
 		thrust::raw_pointer_cast(&t_point2trilist[0]),
 		thrust::raw_pointer_cast(&t_pointtypelist[0]),
@@ -210,7 +210,7 @@ int insertPoint_New(
 
 	}
 	
-	kernelModifyPriority << <numberofblocks, BLOCK_SIZE >> > (
+	kernelModifyPriority <<<numberofblocks, BLOCK_SIZE >>> (
 		thrust::raw_pointer_cast(&t_priorityreal[0]),
 		thrust::raw_pointer_cast(&t_priority[0]),
 		priority_offset[0],
@@ -271,7 +271,7 @@ int insertPoint_New(
 	// To Add: Grid filtering
 
 	// Reject points when violate insertradius rules
-	kernelCheckInsertRadius << <numberofblocks, BLOCK_SIZE >> >(
+	kernelCheckInsertRadius <<<numberofblocks, BLOCK_SIZE >>>(
 		thrust::raw_pointer_cast(&t_pointlist[0]),
 		thrust::raw_pointer_cast(&t_pointradius[0]),
 		thrust::raw_pointer_cast(&t_point2trilist[0]),
@@ -332,7 +332,7 @@ int insertPoint_New(
 	TetHandleD t_searchtet(numofinsertpt, tethandle(-1, 11));
 	TriHandleD t_searchsh(numofencsubseg + numofencsubface, trihandle(-1, 11));
 
-	kernelLocatePoint << <numberofblocks, BLOCK_SIZE >> >(
+	kernelLocatePoint <<<numberofblocks, BLOCK_SIZE >>>(
 		thrust::raw_pointer_cast(&t_pointlist[0]),
 		thrust::raw_pointer_cast(&t_seg2tetlist[0]),
 		thrust::raw_pointer_cast(&t_trifacelist[0]),
@@ -451,7 +451,7 @@ int insertPoint_New(
 	// Form initial cavities
 	// mark and count the initial cavities
 	// mark tets using original thread indices
-	kernelMarkAndCountInitialCavity << <numberofblocks, BLOCK_SIZE >> > (
+	kernelMarkAndCountInitialCavity <<<numberofblocks, BLOCK_SIZE >>> (
 		thrust::raw_pointer_cast(&t_insertidxlist[0]),
 		thrust::raw_pointer_cast(&t_pointlocation[0]),
 		thrust::raw_pointer_cast(&t_threadlist[0]),
@@ -487,7 +487,7 @@ int insertPoint_New(
 		if (numberofthreads > 0)
 		{
 			numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-			kernelCheckRecordOldtet << <numberofblocks, BLOCK_SIZE >> > (
+			kernelCheckRecordOldtet <<<numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_recordoldtetlist[0]),
 				thrust::raw_pointer_cast(&t_recordoldtetidx[0]),
 				thrust::raw_pointer_cast(&t_insertidxlist[0]),
@@ -515,7 +515,7 @@ int insertPoint_New(
 				gpuErrchk(cudaDeviceSynchronize());
 			}
 
-			kernelKeepRecordOldtet << <numberofblocks, BLOCK_SIZE >> > (
+			kernelKeepRecordOldtet <<<numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_recordoldtetidx[0]),
 				thrust::raw_pointer_cast(&t_insertidxlist[0]),
 				thrust::raw_pointer_cast(&t_threadmarker[0]),
@@ -636,7 +636,7 @@ int insertPoint_New(
 			numberofthreads = expandreusesize; // each thread works on one tet in cavetetlist
 			numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
 
-			kernelSetReuseOldtet << < numberofblocks, BLOCK_SIZE >> > (
+			kernelSetReuseOldtet <<< numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_caveoldtetlist[0]),
 				thrust::raw_pointer_cast(&t_caveoldtetidx[0]),
 				oldlistsize,
@@ -658,7 +658,7 @@ int insertPoint_New(
 			IntD t_cavetetexpandsize(numberofthreads, 0), t_cavetetexpandindices(numberofthreads, -1);
 			int cavetetexpandsize;
 
-			kernelCheckCavetetFromReuseOldtet << < numberofblocks, BLOCK_SIZE >> >(
+			kernelCheckCavetetFromReuseOldtet <<< numberofblocks, BLOCK_SIZE >>>(
 				thrust::raw_pointer_cast(&t_caveoldtetlist[0]),
 				thrust::raw_pointer_cast(&t_caveoldtetidx[0]),
 				thrust::raw_pointer_cast(&t_neighborlist[0]),
@@ -681,7 +681,7 @@ int insertPoint_New(
 			t_cavetetlist.resize(oldcavetetsize + cavetetexpandsize);
 			t_cavetetidx.resize(oldcavetetsize + cavetetexpandsize);
 
-			kernelAppendCavetetFromReuseOldtet << < numberofblocks, BLOCK_SIZE >> >(
+			kernelAppendCavetetFromReuseOldtet <<< numberofblocks, BLOCK_SIZE >>>(
 				thrust::raw_pointer_cast(&t_caveoldtetlist[0]),
 				thrust::raw_pointer_cast(&t_caveoldtetidx[0]),
 				thrust::raw_pointer_cast(&t_cavetetlist[0]),
@@ -746,7 +746,7 @@ int insertPoint_New(
 	{
 		if (behavior->cavitymode == 1 && iteration > behavior->maxcavity) // Too large cavities. Stop and mark as unsplittable elements
 		{
-			kernelLargeCavityCheck << < numberofblocks, BLOCK_SIZE >> >(
+			kernelLargeCavityCheck <<< numberofblocks, BLOCK_SIZE >>>(
 				thrust::raw_pointer_cast(&t_insertidxlist[0]),
 				thrust::raw_pointer_cast(&t_insertptlist[0]),
 				thrust::raw_pointer_cast(&t_cavetetidx[0]),
@@ -770,7 +770,7 @@ int insertPoint_New(
 		{
 			int oldnumofthreads = numberofthreads;
 
-			kernelMarkCavityReuse << < numberofblocks, BLOCK_SIZE >> >(
+			kernelMarkCavityReuse <<< numberofblocks, BLOCK_SIZE >>>(
 				thrust::raw_pointer_cast(&t_insertidxlist[0]),
 				thrust::raw_pointer_cast(&t_cavetetidx[0]),
 				thrust::raw_pointer_cast(&t_segstatus[0]),
@@ -789,7 +789,7 @@ int insertPoint_New(
 
 			numberofthreads = t_caveoldtetlist.size();
 			numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-			kernelMarkOldtetlist << < numberofblocks, BLOCK_SIZE >> >(
+			kernelMarkOldtetlist <<< numberofblocks, BLOCK_SIZE >>>(
 				thrust::raw_pointer_cast(&t_caveoldtetlist[0]),
 				thrust::raw_pointer_cast(&t_caveoldtetidx[0]),
 				thrust::raw_pointer_cast(&t_insertidxlist[0]),
@@ -837,7 +837,7 @@ int insertPoint_New(
 
 			numberofthreads = oldnumofthreads;
 			numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-			kernelMarkLargeCavityAsLoser << < numberofblocks, BLOCK_SIZE >> >(
+			kernelMarkLargeCavityAsLoser <<< numberofblocks, BLOCK_SIZE >>>(
 				thrust::raw_pointer_cast(&t_cavetetidx[0]),
 				thrust::raw_pointer_cast(&t_threadmarker[0]),
 				cavetetcurstartindex,
@@ -854,7 +854,7 @@ int insertPoint_New(
 		}
 
 		// Check if current tet is included in cavity
-		kernelCavityExpandingCheck << < numberofblocks, BLOCK_SIZE >> >(
+		kernelCavityExpandingCheck <<< numberofblocks, BLOCK_SIZE >>>(
 			thrust::raw_pointer_cast(&t_cavetetidx[0]),
 			thrust::raw_pointer_cast(&t_pointlist[0]),
 			thrust::raw_pointer_cast(&t_tetlist[0]),
@@ -877,7 +877,7 @@ int insertPoint_New(
 			gpuErrchk(cudaDeviceSynchronize());
 		}
 
-		kernelCorrectExpandingSize << < numberofblocks, BLOCK_SIZE >> > (
+		kernelCorrectExpandingSize <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_cavetetidx[0]),
 			thrust::raw_pointer_cast(&t_cavetetexpandsize[0]),
 			thrust::raw_pointer_cast(&t_caveoldtetexpandsize[0]),
@@ -926,7 +926,7 @@ int insertPoint_New(
 		t_cavebdrylist.resize(newsize);
 		t_cavebdryidx.resize(newsize);
 
-		kernelCavityExpandingMarkAndAppend << < numberofblocks, BLOCK_SIZE >> >(
+		kernelCavityExpandingMarkAndAppend <<< numberofblocks, BLOCK_SIZE >>>(
 			thrust::raw_pointer_cast(&t_cavetetidx[0]),
 			thrust::raw_pointer_cast(&t_neighborlist[0]),
 			thrust::raw_pointer_cast(&t_cavetetlist[0]),
@@ -1032,7 +1032,7 @@ int insertPoint_New(
 	IntD t_cavetetsegsize(numberofthreads, 0), t_cavetetsegindices(numberofthreads, -1);
 	UInt64D t_segmarker2(numofsubseg, 0);
 
-	kernelMarkCavityAdjacentSubsegs << < numberofblocks, BLOCK_SIZE >> >(
+	kernelMarkCavityAdjacentSubsegs <<< numberofblocks, BLOCK_SIZE >>>(
 		thrust::raw_pointer_cast(&t_tet2seglist[0]),
 		thrust::raw_pointer_cast(&t_caveoldtetlist[0]),
 		thrust::raw_pointer_cast(&t_caveoldtetidx[0]),
@@ -1050,7 +1050,7 @@ int insertPoint_New(
 
 	thrust::fill(t_segmarker2.begin(), t_segmarker2.end(), 0);
 
-	kernelCountCavitySubsegs_Phase1 << < numberofblocks, BLOCK_SIZE >> >(
+	kernelCountCavitySubsegs_Phase1 <<< numberofblocks, BLOCK_SIZE >>>(
 		thrust::raw_pointer_cast(&t_tet2seglist[0]),
 		thrust::raw_pointer_cast(&t_caveoldtetlist[0]),
 		thrust::raw_pointer_cast(&t_caveoldtetidx[0]),
@@ -1065,7 +1065,7 @@ int insertPoint_New(
 		gpuErrchk(cudaDeviceSynchronize());
 	}
 
-	kernelCountCavitySubsegs_Phase2 << < numberofblocks, BLOCK_SIZE >> >(
+	kernelCountCavitySubsegs_Phase2 <<< numberofblocks, BLOCK_SIZE >>>(
 		thrust::raw_pointer_cast(&t_tet2seglist[0]),
 		thrust::raw_pointer_cast(&t_caveoldtetlist[0]),
 		thrust::raw_pointer_cast(&t_caveoldtetidx[0]),
@@ -1089,7 +1089,7 @@ int insertPoint_New(
 	if (debug_error)
 		printf("cavetetsegsize = %d\n", cavetetsegsize);
 
-	kernelAppendCavitySubsegs << < numberofblocks, BLOCK_SIZE >> >(
+	kernelAppendCavitySubsegs <<< numberofblocks, BLOCK_SIZE >>>(
 		thrust::raw_pointer_cast(&t_tet2seglist[0]),
 		thrust::raw_pointer_cast(&t_caveoldtetlist[0]),
 		thrust::raw_pointer_cast(&t_caveoldtetidx[0]),
@@ -1116,7 +1116,7 @@ int insertPoint_New(
 		t_cavetetsegsize.resize(cavetetsegsize); // indicate encroached: 0: no 1: yes
 		thrust::fill(t_cavetetsegsize.begin(), t_cavetetsegsize.end(), 0);
 
-		kernelCheckSegmentEncroachment_Phase1 << < numberofblocks, BLOCK_SIZE >> > (
+		kernelCheckSegmentEncroachment_Phase1 <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_insertidxlist[0]),
 			thrust::raw_pointer_cast(&t_insertptlist[0]),
 			thrust::raw_pointer_cast(&t_pointlist[0]),
@@ -1138,7 +1138,7 @@ int insertPoint_New(
 			gpuErrchk(cudaDeviceSynchronize());
 		}
 
-		kernelCheckSegmentEncroachment_Phase2 << < numberofblocks, BLOCK_SIZE >> > (
+		kernelCheckSegmentEncroachment_Phase2 <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_insertidxlist[0]),
 			thrust::raw_pointer_cast(&t_segstatus[0]),
 			thrust::raw_pointer_cast(&t_tristatus[0]),
@@ -1182,7 +1182,7 @@ int insertPoint_New(
 	IntD t_cavetetshsize(numberofthreads, 0), t_cavetetshindices(numberofthreads, -1);
 	IntD t_trimarker2(numofsubface, 0);
 
-	kernelMarkCavityAdjacentFaces << < numberofblocks, BLOCK_SIZE >> >(
+	kernelMarkCavityAdjacentFaces <<< numberofblocks, BLOCK_SIZE >>>(
 		thrust::raw_pointer_cast(&t_tet2trilist[0]),
 		thrust::raw_pointer_cast(&t_neighborlist[0]),
 		thrust::raw_pointer_cast(&t_caveoldtetlist[0]),
@@ -1214,7 +1214,7 @@ int insertPoint_New(
 		gpuErrchk(cudaDeviceSynchronize());
 	}
 
-	kernelCountCavitySubfaces_Phase2 << < numberofblocks, BLOCK_SIZE >> >(
+	kernelCountCavitySubfaces_Phase2 <<< numberofblocks, BLOCK_SIZE >>>(
 		thrust::raw_pointer_cast(&t_tet2trilist[0]),
 		thrust::raw_pointer_cast(&t_caveoldtetlist[0]),
 		thrust::raw_pointer_cast(&t_caveoldtetidx[0]),
@@ -1238,7 +1238,7 @@ int insertPoint_New(
 	if (debug_error)
 		printf("cavetetshsize = %d\n", cavetetshsize);
 
-	kernelAppendCavitySubfaces << < numberofblocks, BLOCK_SIZE >> >(
+	kernelAppendCavitySubfaces <<< numberofblocks, BLOCK_SIZE >>>(
 		thrust::raw_pointer_cast(&t_tet2trilist[0]),
 		thrust::raw_pointer_cast(&t_caveoldtetlist[0]),
 		thrust::raw_pointer_cast(&t_caveoldtetidx[0]),
@@ -1270,7 +1270,7 @@ int insertPoint_New(
 		t_cavetetshsize.resize(cavetetshsize); // indicate encroached: 0: no 1: yes
 		thrust::fill(t_cavetetshsize.begin(), t_cavetetshsize.end(), 0);
 
-		kernelCheckSubfaceEncroachment_Phase1 << < numberofblocks, BLOCK_SIZE >> > (
+		kernelCheckSubfaceEncroachment_Phase1 <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_insertptlist[0]),
 			thrust::raw_pointer_cast(&t_pointlist[0]),
 			thrust::raw_pointer_cast(&t_trifacelist[0]),
@@ -1289,7 +1289,7 @@ int insertPoint_New(
 			gpuErrchk(cudaDeviceSynchronize());
 		}
 
-		kernelCheckSubfaceEncroachment_Phase2 << < numberofblocks, BLOCK_SIZE >> > (
+		kernelCheckSubfaceEncroachment_Phase2 <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_insertidxlist[0]),
 			thrust::raw_pointer_cast(&t_pointlocation[0]),
 			thrust::raw_pointer_cast(&t_tetstatus[0]),
@@ -1347,7 +1347,7 @@ int insertPoint_New(
 		iteration = 0;
 		while (true)
 		{
-			kernelSubCavityExpandingCheck << < numberofblocks, BLOCK_SIZE >> > (
+			kernelSubCavityExpandingCheck <<< numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_pointlist[0]),
 				thrust::raw_pointer_cast(&t_neighborlist[0]),
 				thrust::raw_pointer_cast(&t_trifacelist[0]),
@@ -1388,7 +1388,7 @@ int insertPoint_New(
 			t_caveshidx.resize(newsize);
 
 			// Append expanding subfaces
-			kernelSubCavityExpandingAppend << < numberofblocks, BLOCK_SIZE >> > (
+			kernelSubCavityExpandingAppend <<< numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_tri2trilist[0]),
 				thrust::raw_pointer_cast(&t_caveshlist[0]),
 				thrust::raw_pointer_cast(&t_caveshidx[0]),
@@ -1453,7 +1453,7 @@ int insertPoint_New(
 		t_cavebdryexpandindices.resize(numberofthreads);
 		thrust::fill(t_cavebdryexpandsize.begin(), t_cavebdryexpandsize.end(), 0);
 		t_cavetetflag.resize(numberofthreads, tethandle(-1, 11));
-		kernelCavityBoundarySubfacesCheck << < numberofblocks, BLOCK_SIZE >> > (
+		kernelCavityBoundarySubfacesCheck <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_insertidxlist[0]),
 			thrust::raw_pointer_cast(&t_pointlist[0]),
 			thrust::raw_pointer_cast(&t_tetlist[0]),
@@ -1487,7 +1487,7 @@ int insertPoint_New(
 		if (debug_error)
 			printf("cavebdryexpandsize = %d\n", cavebdryexpandsize);
 
-		kernelCavityBoundarySubfacesAppend << < numberofblocks, BLOCK_SIZE >> > (
+		kernelCavityBoundarySubfacesAppend <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_cavetetshidx[0]),
 			thrust::raw_pointer_cast(&t_cavetetflag[0]),
 			thrust::raw_pointer_cast(&t_cavebdrylist[0]),
@@ -1516,7 +1516,7 @@ int insertPoint_New(
 		thrust::fill(t_cavebdryexpandsize.begin(), t_cavebdryexpandsize.end(), 0);
 		t_cavetetflag.resize(numberofthreads);
 
-		kernelCavityBoundarySubsegsCheck << < numberofblocks, BLOCK_SIZE >> > (
+		kernelCavityBoundarySubsegsCheck <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_pointlist[0]),
 			thrust::raw_pointer_cast(&t_tetlist[0]),
 			thrust::raw_pointer_cast(&t_neighborlist[0]),
@@ -1548,7 +1548,7 @@ int insertPoint_New(
 		if (debug_error)
 			printf("cavebdryexpandsize = %d\n", cavebdryexpandsize);
 
-		kernelCavityBoundarySubsegsAppend << < numberofblocks, BLOCK_SIZE >> > (
+		kernelCavityBoundarySubsegsAppend <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_cavetetsegidx[0]),
 			thrust::raw_pointer_cast(&t_cavetetflag[0]),
 			thrust::raw_pointer_cast(&t_cavebdrylist[0]),
@@ -1586,7 +1586,7 @@ int insertPoint_New(
 	iteration = 0;
 	while (true)
 	{
-		kernelUpdateCavity2StarShapedCheck << < numberofblocks, BLOCK_SIZE >> >(
+		kernelUpdateCavity2StarShapedCheck <<< numberofblocks, BLOCK_SIZE >>>(
 			thrust::raw_pointer_cast(&t_pointlist[0]),
 			thrust::raw_pointer_cast(&t_tetlist[0]),
 			thrust::raw_pointer_cast(&t_neighborlist[0]),
@@ -1620,7 +1620,7 @@ int insertPoint_New(
 		t_cavebdrylist.resize(newsize);
 		t_cavebdryidx.resize(newsize);
 
-		kernelUpdateCavity2StarShapedAppend << < numberofblocks, BLOCK_SIZE >> >(
+		kernelUpdateCavity2StarShapedAppend <<< numberofblocks, BLOCK_SIZE >>>(
 			thrust::raw_pointer_cast(&t_neighborlist[0]),
 			thrust::raw_pointer_cast(&t_cavebdrylist[0]),
 			thrust::raw_pointer_cast(&t_cavebdryidx[0]),
@@ -1676,7 +1676,7 @@ int insertPoint_New(
 	numberofthreads = t_cavebdrylist.size();
 	numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
 
-	kernelUpdateBoundaryFaces << < numberofblocks, BLOCK_SIZE >> >(
+	kernelUpdateBoundaryFaces <<< numberofblocks, BLOCK_SIZE >>>(
 		thrust::raw_pointer_cast(&t_neighborlist[0]),
 		thrust::raw_pointer_cast(&t_cavebdrylist[0]),
 		thrust::raw_pointer_cast(&t_cavebdryidx[0]),
@@ -1695,7 +1695,7 @@ int insertPoint_New(
 	numberofthreads = t_caveoldtetlist.size();
 	numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
 
-	kernelUpdateOldTets << < numberofblocks, BLOCK_SIZE >> >(
+	kernelUpdateOldTets <<< numberofblocks, BLOCK_SIZE >>>(
 		thrust::raw_pointer_cast(&t_neighborlist[0]),
 		thrust::raw_pointer_cast(&t_caveoldtetlist[0]),
 		thrust::raw_pointer_cast(&t_caveoldtetidx[0]),
@@ -1716,7 +1716,7 @@ int insertPoint_New(
 		if (numberofthreads > 0)
 		{
 			numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-			kernelUpdateSubcavities << < numberofblocks, BLOCK_SIZE >> > (
+			kernelUpdateSubcavities <<< numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_neighborlist[0]),
 				thrust::raw_pointer_cast(&t_tri2tetlist[0]),
 				thrust::raw_pointer_cast(&t_caveshlist[0]),
@@ -1737,7 +1737,7 @@ int insertPoint_New(
 		numberofthreads = t_threadlist.size();
 		numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
 
-		kernelValidateSubcavities << < numberofblocks, BLOCK_SIZE >> > (
+		kernelValidateSubcavities <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_insertidxlist[0]),
 			thrust::raw_pointer_cast(&t_pointlocation[0]),
 			thrust::raw_pointer_cast(&t_searchsh[0]),
@@ -1768,7 +1768,7 @@ int insertPoint_New(
 	numberofthreads = t_threadlist.size();
 	numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
 
-	kernelValidateRefinementElements_New << < numberofblocks, BLOCK_SIZE >> >(
+	kernelValidateRefinementElements_New <<< numberofblocks, BLOCK_SIZE >>>(
 		thrust::raw_pointer_cast(&t_insertidxlist[0]),
 		thrust::raw_pointer_cast(&t_searchsh[0]),
 		thrust::raw_pointer_cast(&t_searchtet[0]),
@@ -1790,7 +1790,7 @@ int insertPoint_New(
 	}
 
 	// Reject new points if they lie too close to existing ones
-	kernelCheckDistances2ClosePoints << < numberofblocks, BLOCK_SIZE >> > (
+	kernelCheckDistances2ClosePoints <<< numberofblocks, BLOCK_SIZE >>> (
 		thrust::raw_pointer_cast(&t_insertidxlist[0]),
 		thrust::raw_pointer_cast(&t_insertptlist[0]),
 		thrust::raw_pointer_cast(&t_pointlocation[0]),
@@ -1840,7 +1840,7 @@ int insertPoint_New(
 	if (behavior->cavitymode == 2)
 	{
 		// All winners complete their cavities, reset flag if needed
-		kernelResetCavityReuse << < numberofblocks, BLOCK_SIZE >> > (
+		kernelResetCavityReuse <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_insertidxlist[0]),
 			thrust::raw_pointer_cast(&t_threadlist[0]),
 			thrust::raw_pointer_cast(&t_segstatus[0]),
@@ -1862,7 +1862,7 @@ int insertPoint_New(
 	if (numberofthreads > 0)
 	{
 		numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-		kernelUpdateCavitySubsegs << < numberofblocks, BLOCK_SIZE >> > (
+		kernelUpdateCavitySubsegs <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_tetlist[0]),
 			thrust::raw_pointer_cast(&t_neighborlist[0]),
 			thrust::raw_pointer_cast(&t_seglist[0]),
@@ -1887,7 +1887,7 @@ int insertPoint_New(
 	if (numberofthreads > 0)
 	{
 		numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-		kernelUpdateCavitySubfaces << < numberofblocks, BLOCK_SIZE >> > (
+		kernelUpdateCavitySubfaces <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_neighborlist[0]),
 			thrust::raw_pointer_cast(&t_tri2tetlist[0]),
 			thrust::raw_pointer_cast(&t_cavetetshlist[0]),
@@ -1926,7 +1926,7 @@ int insertPoint_New(
 	t_pointradius.resize(newsize, 0.0);
 
 	IntD t_threadpos(numofinsertpt, -1);
-	kernelInsertNewPoints << < numberofblocks, BLOCK_SIZE >> >(
+	kernelInsertNewPoints <<< numberofblocks, BLOCK_SIZE >>>(
 		thrust::raw_pointer_cast(&t_threadlist[0]),
 		thrust::raw_pointer_cast(&t_pointlist[0]),
 		thrust::raw_pointer_cast(&t_pointtypelist[0]),
@@ -1954,7 +1954,7 @@ int insertPoint_New(
 	// remove loser from t_cavebdrylist
 	numberofthreads = t_cavebdrylist.size();
 	numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-	kernelSetCavityThreadIdx << < numberofblocks, BLOCK_SIZE >> > (
+	kernelSetCavityThreadIdx <<< numberofblocks, BLOCK_SIZE >>> (
 		thrust::raw_pointer_cast(&t_cavebdryidx[0]),
 		thrust::raw_pointer_cast(&t_threadmarker[0]),
 		numberofthreads
@@ -1990,7 +1990,7 @@ int insertPoint_New(
 
 	numberofthreads = t_cavebdrylist.size();
 	numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-	kernelComputeShortestEdgeLength_Phase1 << < numberofblocks, BLOCK_SIZE >> > (
+	kernelComputeShortestEdgeLength_Phase1 <<< numberofblocks, BLOCK_SIZE >>> (
 		thrust::raw_pointer_cast(&t_cavebdryidx[0]),
 		thrust::raw_pointer_cast(&t_scanleft[0]),
 		thrust::raw_pointer_cast(&t_scanright[0]),
@@ -2006,7 +2006,7 @@ int insertPoint_New(
 
 	numberofthreads = t_threadlist.size();
 	numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-	kernelComputeShortestEdgeLength_Phase2 << < numberofblocks, BLOCK_SIZE >> >(
+	kernelComputeShortestEdgeLength_Phase2 <<< numberofblocks, BLOCK_SIZE >>>(
 		thrust::raw_pointer_cast(&t_threadlist[0]),
 		thrust::raw_pointer_cast(&t_pointlist[0]),
 		thrust::raw_pointer_cast(&t_tetlist[0]),
@@ -2057,7 +2057,7 @@ int insertPoint_New(
 		gpuErrchk(cudaDeviceSynchronize());
 	}
 
-	kernelInsertNewTets << < numberofblocks, BLOCK_SIZE >> > (
+	kernelInsertNewTets <<< numberofblocks, BLOCK_SIZE >>> (
 		thrust::raw_pointer_cast(&t_cavebdrylist[0]),
 		thrust::raw_pointer_cast(&t_cavebdryidx[0]),
 		thrust::raw_pointer_cast(&t_point2tetlist[0]),
@@ -2076,7 +2076,7 @@ int insertPoint_New(
 	}
 
 	// Connect adjacent new tetrahedra together
-	kernelConnectNewTetNeighbors << < numberofblocks, BLOCK_SIZE >> >(
+	kernelConnectNewTetNeighbors <<< numberofblocks, BLOCK_SIZE >>>(
 		thrust::raw_pointer_cast(&t_cavebdrylist[0]),
 		thrust::raw_pointer_cast(&t_cavebdryidx[0]),
 		thrust::raw_pointer_cast(&t_point2tetlist[0]),
@@ -2098,7 +2098,7 @@ int insertPoint_New(
 	if (numberofthreads > 0)
 	{
 		numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-		kernelSetCavityThreadIdx << < numberofblocks, BLOCK_SIZE >> > (
+		kernelSetCavityThreadIdx <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_cavetetshidx[0]),
 			thrust::raw_pointer_cast(&t_threadmarker[0]),
 			numberofthreads
@@ -2123,7 +2123,7 @@ int insertPoint_New(
 		if (numberofthreads > 0)
 		{
 			numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-			kernelConnectBoundarySubfaces2NewTets << < numberofblocks, BLOCK_SIZE >> >(
+			kernelConnectBoundarySubfaces2NewTets <<< numberofblocks, BLOCK_SIZE >>>(
 				thrust::raw_pointer_cast(&t_tri2tetlist[0]),
 				thrust::raw_pointer_cast(&t_neighborlist[0]),
 				thrust::raw_pointer_cast(&t_tet2trilist[0]),
@@ -2146,7 +2146,7 @@ int insertPoint_New(
 	if (numberofthreads > 0)
 	{
 		numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-		kernelSetCavityThreadIdx << < numberofblocks, BLOCK_SIZE >> > (
+		kernelSetCavityThreadIdx <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_cavetetsegidx[0]),
 			thrust::raw_pointer_cast(&t_threadmarker[0]),
 			numberofthreads
@@ -2171,7 +2171,7 @@ int insertPoint_New(
 		if (numberofthreads > 0)
 		{
 			numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-			kernelConnectBoundarySubsegs2NewTets << < numberofblocks, BLOCK_SIZE >> > (
+			kernelConnectBoundarySubsegs2NewTets <<< numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_seg2tetlist[0]),
 				thrust::raw_pointer_cast(&t_neighborlist[0]),
 				thrust::raw_pointer_cast(&t_tet2seglist[0]),
@@ -2209,7 +2209,7 @@ int insertPoint_New(
 			// Clean up t_caveshlist first
 			// remove loser from t_caveshlist
 			numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-			kernelSetCavityThreadIdx << < numberofblocks, BLOCK_SIZE >> > (
+			kernelSetCavityThreadIdx <<< numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_caveshidx[0]),
 				thrust::raw_pointer_cast(&t_threadmarker[0]),
 				numberofthreads
@@ -2245,7 +2245,7 @@ int insertPoint_New(
 			// Create subcavity boundary edge list
 			numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
 			IntD t_caveshbdsize(numberofthreads, 0), t_caveshbdindices(numberofthreads, -1);
-			kernelSubCavityBoundaryEdgeCheck << < numberofblocks, BLOCK_SIZE >> > (
+			kernelSubCavityBoundaryEdgeCheck <<< numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_tri2seglist[0]),
 				thrust::raw_pointer_cast(&t_tri2trilist[0]),
 				thrust::raw_pointer_cast(&t_caveshlist[0]),
@@ -2267,7 +2267,7 @@ int insertPoint_New(
 			t_caveshbdlist.resize(caveshbdsize);
 			t_caveshbdidx.resize(caveshbdsize);
 
-			kernelSubCavityBoundaryEdgeAppend << < numberofblocks, BLOCK_SIZE >> > (
+			kernelSubCavityBoundaryEdgeAppend <<< numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_tri2seglist[0]),
 				thrust::raw_pointer_cast(&t_tri2trilist[0]),
 				thrust::raw_pointer_cast(&t_caveshlist[0]),
@@ -2308,7 +2308,7 @@ int insertPoint_New(
 			numberofthreads = caveshbdsize;
 			numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
 			TriHandleD t_casout(numberofthreads, trihandle(-1, 0)), t_casin(numberofthreads, trihandle(-1, 0));
-			kernelInsertNewSubfaces << < numberofblocks, BLOCK_SIZE >> > (
+			kernelInsertNewSubfaces <<< numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_point2trilist[0]),
 				thrust::raw_pointer_cast(&t_pointtypelist[0]),
 				thrust::raw_pointer_cast(&t_seglist[0]),
@@ -2333,7 +2333,7 @@ int insertPoint_New(
 				gpuErrchk(cudaDeviceSynchronize());
 			}
 
-			kernelConnectNewSubface2OuterSubface_Phase1 << < numberofblocks, BLOCK_SIZE >> > (
+			kernelConnectNewSubface2OuterSubface_Phase1 <<< numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_seglist[0]),
 				thrust::raw_pointer_cast(&t_trifacelist[0]),
 				thrust::raw_pointer_cast(&t_tri2trilist[0]),
@@ -2353,7 +2353,7 @@ int insertPoint_New(
 				gpuErrchk(cudaDeviceSynchronize());
 			}
 
-			kernelConnectNewSubface2OuterSubface_Phase2 << < numberofblocks, BLOCK_SIZE >> > (
+			kernelConnectNewSubface2OuterSubface_Phase2 <<< numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_point2trilist[0]),
 				thrust::raw_pointer_cast(&t_pointtypelist[0]),
 				thrust::raw_pointer_cast(&t_seglist[0]),
@@ -2377,7 +2377,7 @@ int insertPoint_New(
 				gpuErrchk(cudaDeviceSynchronize());
 			}
 
-			kernelConnectNewSubfaceNeighbors << < numberofblocks, BLOCK_SIZE >> > (
+			kernelConnectNewSubfaceNeighbors <<< numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_trifacelist[0]),
 				thrust::raw_pointer_cast(&t_tri2trilist[0]),
 				thrust::raw_pointer_cast(&t_tristatus[0]),
@@ -2400,7 +2400,7 @@ int insertPoint_New(
 		if (numberofthreads > 0)
 		{
 			numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-			kernelSetCavityThreadIdx << < numberofblocks, BLOCK_SIZE >> > (
+			kernelSetCavityThreadIdx <<< numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_cavesegshidx[0]),
 				thrust::raw_pointer_cast(&t_threadmarker[0]),
 				numberofthreads
@@ -2421,7 +2421,7 @@ int insertPoint_New(
 		if (numberofthreads > 0)
 		{
 			numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-			kernelRemoveDegeneratedNewSubfaces << < numberofblocks, BLOCK_SIZE >> > (
+			kernelRemoveDegeneratedNewSubfaces <<< numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_point2trilist[0]),
 				thrust::raw_pointer_cast(&t_pointtypelist[0]),
 				thrust::raw_pointer_cast(&t_trifacelist[0]),
@@ -2463,7 +2463,7 @@ int insertPoint_New(
 
 			numberofthreads = t_threadlist.size();
 			numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-			kernelInsertNewSubsegs << < numberofblocks, BLOCK_SIZE >> > (
+			kernelInsertNewSubsegs <<< numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_insertidxlist[0]),
 				thrust::raw_pointer_cast(&t_threadlist[0]),
 				thrust::raw_pointer_cast(&t_point2trilist[0]),
@@ -2489,7 +2489,7 @@ int insertPoint_New(
 			if (numberofthreads > 0)
 			{
 				numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-				kernelConnectNewSubseg2NewSubface << < numberofblocks, BLOCK_SIZE >> > (
+				kernelConnectNewSubseg2NewSubface <<< numberofblocks, BLOCK_SIZE >>> (
 					thrust::raw_pointer_cast(&t_insertidxlist[0]),
 					thrust::raw_pointer_cast(&t_threadlist[0]),
 					thrust::raw_pointer_cast(&t_seglist[0]),
@@ -2519,7 +2519,7 @@ int insertPoint_New(
 			t_cavesegshidx.resize(2 * numberofsplittablesubsegs);
 			numberofthreads = t_threadlist.size();
 			numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-			kernelConnectNewSubseg2OuterSubseg << < numberofblocks, BLOCK_SIZE >> > (
+			kernelConnectNewSubseg2OuterSubseg <<< numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_insertidxlist[0]),
 				thrust::raw_pointer_cast(&t_threadlist[0]),
 				thrust::raw_pointer_cast(&t_seg2trilist[0]),
@@ -2543,7 +2543,7 @@ int insertPoint_New(
 		if (numberofthreads > 0)
 		{
 			numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-			kernelConnectNewSubfaces2NewTets << < numberofblocks, BLOCK_SIZE >> > (
+			kernelConnectNewSubfaces2NewTets <<< numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_trifacelist[0]),
 				thrust::raw_pointer_cast(&t_tri2tetlist[0]),
 				thrust::raw_pointer_cast(&t_tri2trilist[0]),
@@ -2572,7 +2572,7 @@ int insertPoint_New(
 		{
 			numberofthreads = t_cavesegshlist.size();
 			numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-			kernelConnectNewSubsegs2NewTets << < numberofblocks, BLOCK_SIZE >> > (
+			kernelConnectNewSubsegs2NewTets <<< numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_pointlist[0]),
 				thrust::raw_pointer_cast(&t_point2tetlist[0]),
 				thrust::raw_pointer_cast(&t_seglist[0]),
@@ -2608,7 +2608,7 @@ int insertPoint_New(
 	if (numberofthreads > 0)
 	{
 		numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-		kernelUpdateSegencmarker_Phase1 << < numberofblocks, BLOCK_SIZE >> > (
+		kernelUpdateSegencmarker_Phase1 <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_pointlist[0]),
 			thrust::raw_pointer_cast(&t_seglist[0]),
 			thrust::raw_pointer_cast(&t_seg2tetlist[0]),
@@ -2633,7 +2633,7 @@ int insertPoint_New(
 	if (numberofthreads > 0 && numberofsplittablesubsegs != 0)
 	{
 		numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-		kernelUpdateSegencmarker_Phase2 << < numberofblocks, BLOCK_SIZE >> > (
+		kernelUpdateSegencmarker_Phase2 <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_pointlist[0]),
 			thrust::raw_pointer_cast(&t_seglist[0]),
 			thrust::raw_pointer_cast(&t_seg2tetlist[0]),
@@ -2658,7 +2658,7 @@ int insertPoint_New(
 	if (numberofthreads > 0)
 	{
 		numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-		kernelUpdateSubfaceencmarker_Phase1 << < numberofblocks, BLOCK_SIZE >> > (
+		kernelUpdateSubfaceencmarker_Phase1 <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_pointlist[0]),
 			thrust::raw_pointer_cast(&t_trifacelist[0]),
 			thrust::raw_pointer_cast(&t_tri2tetlist[0]),
@@ -2682,7 +2682,7 @@ int insertPoint_New(
 	if (numberofthreads > 0)
 	{
 		numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-		kernelUpdateSubfaceencmarker_Phase2 << < numberofblocks, BLOCK_SIZE >> > (
+		kernelUpdateSubfaceencmarker_Phase2 <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_pointlist[0]),
 			thrust::raw_pointer_cast(&t_trifacelist[0]),
 			thrust::raw_pointer_cast(&t_tri2tetlist[0]),
@@ -2706,7 +2706,7 @@ int insertPoint_New(
 	// Update tet bad status
 	numberofthreads = t_cavebdrylist.size();
 	numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-	kernelUpdateTetBadstatus << < numberofblocks, BLOCK_SIZE >> > (
+	kernelUpdateTetBadstatus <<< numberofblocks, BLOCK_SIZE >>> (
 		thrust::raw_pointer_cast(&t_pointlist[0]),
 		thrust::raw_pointer_cast(&t_tetlist[0]),
 		thrust::raw_pointer_cast(&t_tetstatus[0]),
@@ -2725,7 +2725,7 @@ int insertPoint_New(
 	// Update insertion radius after insertion
 	numberofthreads = t_threadlist.size();
 	numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-	kernelUpdateInsertRadius << < numberofblocks, BLOCK_SIZE >> >(
+	kernelUpdateInsertRadius <<< numberofblocks, BLOCK_SIZE >>>(
 		thrust::raw_pointer_cast(&t_threadlist[0]),
 		thrust::raw_pointer_cast(&t_insertidxlist[0]),
 		thrust::raw_pointer_cast(&t_pointlist[0]),
@@ -2754,7 +2754,7 @@ int insertPoint_New(
 	// Clear old elements' information
 	if (numberofsplittablesubsegs != 0)
 	{
-		kernelResetOldSubsegInfo << < numberofblocks, BLOCK_SIZE >> > (
+		kernelResetOldSubsegInfo <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_insertidxlist[0]),
 			thrust::raw_pointer_cast(&t_threadlist[0]),
 			thrust::raw_pointer_cast(&t_threadmarker[0]),
@@ -2775,7 +2775,7 @@ int insertPoint_New(
 		if (numberofthreads > 0)
 		{
 			numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-			kernelResetOldSubfaceInfo << < numberofblocks, BLOCK_SIZE >> > (
+			kernelResetOldSubfaceInfo <<< numberofblocks, BLOCK_SIZE >>> (
 				thrust::raw_pointer_cast(&t_tri2trilist[0]),
 				thrust::raw_pointer_cast(&t_tri2seglist[0]),
 				thrust::raw_pointer_cast(&t_tristatus[0]),
@@ -2798,7 +2798,7 @@ int insertPoint_New(
 	// remove loser from t_caveoldtetlist
 	numberofthreads = t_caveoldtetlist.size();
 	numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-	kernelSetCavityThreadIdx << < numberofblocks, BLOCK_SIZE >> > (
+	kernelSetCavityThreadIdx <<< numberofblocks, BLOCK_SIZE >>> (
 		thrust::raw_pointer_cast(&t_caveoldtetidx[0]),
 		thrust::raw_pointer_cast(&t_threadmarker[0]),
 		numberofthreads
@@ -2815,7 +2815,7 @@ int insertPoint_New(
 
 	numberofthreads = t_caveoldtetlist.size();
 	numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-	kernelResetOldTetInfo << < numberofblocks, BLOCK_SIZE >> > (
+	kernelResetOldTetInfo <<< numberofblocks, BLOCK_SIZE >>> (
 		thrust::raw_pointer_cast(&t_neighborlist[0]),
 		thrust::raw_pointer_cast(&t_tet2trilist[0]),
 		thrust::raw_pointer_cast(&t_tet2seglist[0]),
@@ -2849,7 +2849,7 @@ int insertPoint_New(
 	{
 		numberofthreads = t_pointtypelist.size();
 		numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-		kernelCheckPointNeighbors << < numberofblocks, BLOCK_SIZE >> > (
+		kernelCheckPointNeighbors <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_point2trilist[0]),
 			thrust::raw_pointer_cast(&t_point2tetlist[0]),
 			thrust::raw_pointer_cast(&t_pointtypelist[0]),
@@ -2864,7 +2864,7 @@ int insertPoint_New(
 
 		numberofthreads = t_segstatus.size();
 		numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-		kernelCheckSubsegNeighbors << < numberofblocks, BLOCK_SIZE >> > (
+		kernelCheckSubsegNeighbors <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_seglist[0]),
 			thrust::raw_pointer_cast(&t_seg2trilist[0]),
 			thrust::raw_pointer_cast(&t_seg2tetlist[0]),
@@ -2880,7 +2880,7 @@ int insertPoint_New(
 
 		numberofthreads = t_tristatus.size();
 		numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-		kernelCheckSubfaceNeighbors << < numberofblocks, BLOCK_SIZE >> > (
+		kernelCheckSubfaceNeighbors <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_seglist[0]),
 			thrust::raw_pointer_cast(&t_seg2trilist[0]),
 			thrust::raw_pointer_cast(&t_segstatus[0]),
@@ -2897,7 +2897,7 @@ int insertPoint_New(
 
 		numberofthreads = t_tetstatus.size();
 		numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-		kernelCheckTetNeighbors << < numberofblocks, BLOCK_SIZE >> > (
+		kernelCheckTetNeighbors <<< numberofblocks, BLOCK_SIZE >>> (
 			thrust::raw_pointer_cast(&t_seglist[0]),
 			thrust::raw_pointer_cast(&t_seg2tetlist[0]),
 			thrust::raw_pointer_cast(&t_segstatus[0]),

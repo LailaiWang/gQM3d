@@ -312,7 +312,7 @@ bool readResultFile_without_acute_angles_tetgen(
 	double * data
 )
 {
-
+	return false;
 }
 
 void refineMeshCPU_without_acute_angles()

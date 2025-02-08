@@ -767,7 +767,7 @@ void reconstructMesh(
 				continue;
 			}
 			neigh = intertri2tetlist[2 * i + 0];
-			assert(neigh1 != -1);
+			assert(neigh != -1);
 			ver = intertri2tetlist[2 * i + 1];
 			tetloop.id = neigh;
 			tetloop.ver = ver;
@@ -1379,7 +1379,7 @@ void makesegment2parentmap(
 				segment2parentlist[nextseg.id] = segindex;
 				nextseg.shver = 0;
 				if (sorg(nextseg, segmentlist) != edest) sesymself(nextseg);
-				assert(sorg(nextseg) == edest);
+				assert(sorg(nextseg, segmentlist) == edest);
 				edest = sdest(nextseg, segmentlist);
 				// Go the next connected subsegment at edest.
 				senextself(nextseg);
@@ -1467,7 +1467,7 @@ void makesubfacepointsmap(
 				for (j = 0; j < 3; j++) {
 					if (!isshsubseg(parysh, subface2seglist)) {
 						spivot(parysh, neighsh, subface2subfacelist);
-						assert(neighsh.sh != NULL);
+						assert(neighsh.shver != NULL);
 						//if (subloop.id == 27)
 						//{
 						//	int tmp[4];

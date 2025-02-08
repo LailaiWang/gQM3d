@@ -38,7 +38,7 @@ void compactMesh(
 
 	numberofthreads = last_edge;
 	numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-	kernelCompactSeg << <numberofblocks, BLOCK_SIZE >> > (
+	kernelCompactSeg <<<numberofblocks, BLOCK_SIZE>>> (
 		thrust::raw_pointer_cast(&t_seglist[0]),
 		thrust::raw_pointer_cast(&t_sizes[0]),
 		thrust::raw_pointer_cast(&t_indices[0]),
@@ -59,7 +59,7 @@ void compactMesh(
 
 	numberofthreads = last_triface;
 	numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
-	kernelCompactTriface << <numberofblocks, BLOCK_SIZE >> > (
+	kernelCompactTriface <<<numberofblocks, BLOCK_SIZE>>> (
 		thrust::raw_pointer_cast(&t_trifacelist[0]),
 		thrust::raw_pointer_cast(&t_sizes[0]),
 		thrust::raw_pointer_cast(&t_indices[0]),
@@ -75,7 +75,7 @@ void compactMesh(
 	numberofthreads = last_tet;
 	numberofblocks = (ceil)((float)numberofthreads / BLOCK_SIZE);
 
-	kernelCompactTet_Phase1 << <numberofblocks, BLOCK_SIZE >> > (
+	kernelCompactTet_Phase1 <<<numberofblocks, BLOCK_SIZE>>> (
 		thrust::raw_pointer_cast(&t_tetlist[0]),
 		thrust::raw_pointer_cast(&t_tetstatus[0]),
 		thrust::raw_pointer_cast(&t_sizes[0]),
@@ -87,7 +87,7 @@ void compactMesh(
 	out_tetlist = new int[4 * out_numoftet];
 	t_list.resize(4 * out_numoftet);
 
-	kernelCompactTet_Phase2 << <numberofblocks, BLOCK_SIZE >> > (
+	kernelCompactTet_Phase2 <<<numberofblocks, BLOCK_SIZE>>> (
 		thrust::raw_pointer_cast(&t_tetlist[0]),
 		thrust::raw_pointer_cast(&t_sizes[0]),
 		thrust::raw_pointer_cast(&t_indices[0]),

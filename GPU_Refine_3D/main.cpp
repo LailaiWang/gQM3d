@@ -6,7 +6,7 @@
 #include "Viewer.h"
 #include "CudaRefine.h"
 #include "MeshRefine.h"
-
+#include <sstream>
 /**
 * Host main routine
 */
